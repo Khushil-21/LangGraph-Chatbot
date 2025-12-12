@@ -26,4 +26,4 @@ graph.add_node("chat bot",chat_node)
 graph.add_edge(START, "chat bot")
 graph.add_edge("chat bot", END)
 
-chat_bot = graph.compile(checkpointer=checkpointer)
+chatbot = graph.compile(checkpointer=checkpointer)
