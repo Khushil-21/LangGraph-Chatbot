@@ -57,7 +57,7 @@ st.title(f"Chatbot - {st.session_state['current_thread_id']}")
 st.sidebar.title(f"LangGraph Chatbot")
 st.sidebar.button("New Chat", on_click=new_chat)
 st.sidebar.header("Past Chats")
-for thread_id in st.session_state["all_threads"]:
+for thread_id in st.session_state["all_threads"][::-1]:
     st.sidebar.button(
         f"Thread ID: {thread_id}", on_click=switch_thread, args=(thread_id,)
     )
