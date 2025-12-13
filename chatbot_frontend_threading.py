@@ -1,16 +1,16 @@
 import streamlit as st
 from langchain_core.messages import HumanMessage
 from chatbot_backend import chatbot
+from title_generation_workflow import title_generation_agent
 from utils import get_thread_id
 
 # ------------------------- Helper Functions -------------------------
 
 
 def load_message_history(thread_id):
-    loaded_messages = chatbot.get_state(
-        config={"configurable": {"thread_id": thread_id}}
-    ).values.get("messages", [])
-    # Check if messages key exists in state values, return empty list if not
+    state = chatbot.get_state(config={"configurable": {"thread_id": thread_id}}).values
+    loaded_messages = state.get("messages", [])
+
     if loaded_messages:
         all_messages = []
         for message in loaded_messages:
@@ -31,20 +31,25 @@ def switch_thread(thread_id):
 
 def new_chat():
     new_thread_id = get_thread_id()
-    st.session_state["all_threads"].append(new_thread_id)
+    st.session_state["all_threads"][new_thread_id] = "New Chat"
     st.session_state["message_history"] = []
     switch_thread(new_thread_id)
+
+
+def save_thread_title(title):
+    print("Saving thread title", title)
+    st.session_state["all_threads"][st.session_state["current_thread_id"]] = title
 
 
 # ------------------------- Loading Session State  -------------------------
 
 if "all_threads" not in st.session_state:
-    st.session_state["all_threads"] = []
+    st.session_state["all_threads"] = {}
 
 if "current_thread_id" not in st.session_state:
     thread_id = get_thread_id()
     st.session_state["current_thread_id"] = thread_id
-    st.session_state["all_threads"].append(thread_id)
+    st.session_state["all_threads"][thread_id] = "New Chat"
 
 if "message_history" not in st.session_state:
     st.session_state["message_history"] = []
@@ -55,11 +60,16 @@ CONFIG = {"configurable": {"thread_id": st.session_state["current_thread_id"]}}
 st.title(f"Chatbot - {st.session_state['current_thread_id']}")
 
 st.sidebar.title(f"LangGraph Chatbot")
-st.sidebar.button("New Chat", on_click=new_chat)
+st.sidebar.button("Start New Chat", on_click=new_chat)
+st.sidebar.divider()
 st.sidebar.header("Past Chats")
-for thread_id in st.session_state["all_threads"][::-1]:
+# st.sidebar.write(st.session_state["all_threads"])
+for thread_id, title in reversed(list(st.session_state["all_threads"].items())):
     st.sidebar.button(
-        f"Thread ID: {thread_id}", on_click=switch_thread, args=(thread_id,)
+        key=thread_id,
+        label=f"{title}",
+        on_click=switch_thread,
+        args=(thread_id,),
     )
 
 
@@ -74,6 +84,18 @@ if user_input:
     st.session_state["message_history"].append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.text(user_input)
+
+    if (
+        st.session_state["all_threads"][st.session_state["current_thread_id"]]
+        == "New Chat"
+        and len(st.session_state["message_history"]) >= 3
+    ):
+        title_response = title_generation_agent.invoke(
+            {
+                "prompt_with_chat_history": f"Here is the chat history: {st.session_state["message_history"]}"
+            }
+        )
+        save_thread_title(title_response["title"].title)
 
     with st.chat_message("assistant"):
         assistant_response = st.write_stream(
