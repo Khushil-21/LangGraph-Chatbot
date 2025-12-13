@@ -57,10 +57,15 @@ if "message_history" not in st.session_state:
 
 CONFIG = {"configurable": {"thread_id": st.session_state["current_thread_id"]}}
 
-st.title(f"Chatbot - {st.session_state['current_thread_id']}")
+st.title(
+    f"{st.session_state['all_threads'][st.session_state['current_thread_id']]}"
+)
+st.caption(f"Thread ID: {st.session_state['current_thread_id']}")
+
 
 st.sidebar.title(f"LangGraph Chatbot")
-st.sidebar.button("Start New Chat", on_click=new_chat)
+st.sidebar.button("Start New Chat", on_click=new_chat,type="primary", width="stretch" , icon=":material/add:")
+
 st.sidebar.divider()
 st.sidebar.header("Past Chats")
 # st.sidebar.write(st.session_state["all_threads"])
@@ -70,6 +75,10 @@ for thread_id, title in reversed(list(st.session_state["all_threads"].items())):
         label=f"{title}",
         on_click=switch_thread,
         args=(thread_id,),
+        width="stretch",
+        type="secondary" if thread_id != st.session_state["current_thread_id"] else "primary",
+        # disabled=thread_id == st.session_state["current_thread_id"],
+        icon=":material/chat:",
     )
 
 
@@ -85,18 +94,6 @@ if user_input:
     with st.chat_message("user"):
         st.text(user_input)
 
-    if (
-        st.session_state["all_threads"][st.session_state["current_thread_id"]]
-        == "New Chat"
-        and len(st.session_state["message_history"]) >= 3
-    ):
-        title_response = title_generation_agent.invoke(
-            {
-                "prompt_with_chat_history": f"Here is the chat history: {st.session_state["message_history"]}"
-            }
-        )
-        save_thread_title(title_response["title"].title)
-
     with st.chat_message("assistant"):
         assistant_response = st.write_stream(
             message_chunk.content
@@ -109,3 +106,16 @@ if user_input:
         st.session_state["message_history"].append(
             {"role": "assistant", "content": assistant_response}
         )
+ 
+    if (
+        st.session_state["all_threads"][st.session_state["current_thread_id"]]
+        == "New Chat"
+        and len(st.session_state["message_history"]) >= 3
+    ):
+        title_response = title_generation_agent.invoke(
+            {
+                "prompt_with_chat_history": f"Here is the chat history: {st.session_state["message_history"]}"
+            }
+        )
+        save_thread_title(title_response["title"].title)
+        st.rerun()
