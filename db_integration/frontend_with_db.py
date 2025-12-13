@@ -1,6 +1,7 @@
 import streamlit as st
 from langchain_core.messages import HumanMessage
-from backend_with_db import chatbot, get_all_thread_ids
+from backend_with_db import chatbot
+from tittle_with_db import get_all_threads
 from tittle_with_db import title_generation_agent
 import uuid
 # ------------------------- Helper Functions -------------------------
@@ -47,7 +48,7 @@ def save_thread_title(title):
 # ------------------------- Loading Session State  -------------------------
 
 if "all_threads" not in st.session_state:
-    st.session_state["all_threads"] = get_all_thread_ids()
+    st.session_state["all_threads"] = get_all_threads()
 
 if "current_thread_id" not in st.session_state:
     thread_id = get_thread_id()
@@ -126,7 +127,8 @@ if user_input:
         title_response = title_generation_agent.invoke(
             {
                 "prompt_with_chat_history": f"Here is the chat history: {st.session_state["message_history"]}"
-            }
+            },
+            config=CONFIG,
         )
-        save_thread_title(title_response["title"].title)
+        save_thread_title(title_response["title"])
         st.rerun()
