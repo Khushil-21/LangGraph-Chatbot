@@ -2,10 +2,14 @@ import streamlit as st
 from langchain_core.messages import HumanMessage
 from chatbot_backend import chatbot
 from title_generation_workflow import title_generation_agent
-from utils import get_thread_id
+import uuid
 
 # ------------------------- Helper Functions -------------------------
 
+
+def get_thread_id():
+    thread_id = str(uuid.uuid4())
+    return thread_id
 
 def load_message_history(thread_id):
     state = chatbot.get_state(config={"configurable": {"thread_id": thread_id}}).values

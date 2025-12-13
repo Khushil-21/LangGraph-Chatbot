@@ -57,7 +57,4 @@ def get_all_threads():
     for thread_id in all_thread_ids:
         state=title_generation_agent.get_state(config={"configurable": {"thread_id": f"{thread_id}"}}).values
         all_thread_ids_obj[thread_id] = state["title"] if state["title"] else "New Chat"
-    print(all_thread_ids_obj)
     return all_thread_ids_obj
-
-get_all_threads()
