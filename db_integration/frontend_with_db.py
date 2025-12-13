@@ -51,12 +51,14 @@ if "all_threads" not in st.session_state:
     st.session_state["all_threads"] = get_all_threads()
 
 if "current_thread_id" not in st.session_state:
-    thread_id = get_thread_id()
+    # thread_id = get_thread_id()
+    thread_id=list(st.session_state["all_threads"].keys())[-1]
     st.session_state["current_thread_id"] = thread_id
-    st.session_state["all_threads"][thread_id] = "New Chat"
-
-if "message_history" not in st.session_state:
-    st.session_state["message_history"] = []
+    # st.session_state["all_threads"][thread_id] = "New Chat"
+    load_message_history(thread_id)
+    
+# if "message_history" not in st.session_state:
+#     st.session_state["message_history"] = []
 
 
 CONFIG = {"configurable": {"thread_id": st.session_state["current_thread_id"]}}

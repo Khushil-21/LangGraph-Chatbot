@@ -19,7 +19,7 @@ class TitleGeneration(BaseModel):
 
 class TitleState(TypedDict):
     prompt_with_chat_history: str
-    title: str = "New Chat"
+    title: str
 
 
 def title_node(state: TitleState) -> TitleState:
@@ -43,9 +43,6 @@ graph.add_node("title_node", title_node)
 graph.add_edge(START, "title_node")
 graph.add_edge("title_node", END)
 title_generation_agent = graph.compile(checkpointer=checkpointer)
-
-# print(title_generation_agent.get_state(config={"configurable": {"thread_id": "afdd8d87-6010-453d-bc4a-7f7eea956e89"}}).values['title'])
-
 
 def get_all_threads_ids():
     all_thread_ids = set()
