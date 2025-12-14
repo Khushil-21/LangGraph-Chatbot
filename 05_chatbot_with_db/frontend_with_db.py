@@ -4,12 +4,14 @@ from backend_with_db import chatbot
 from tittle_with_db import get_all_threads
 from tittle_with_db import title_generation_agent
 import uuid
+
 # ------------------------- Helper Functions -------------------------
 
 
 def get_thread_id():
     thread_id = str(uuid.uuid4())
     return thread_id
+
 
 def load_message_history(thread_id):
     state = chatbot.get_state(config={"configurable": {"thread_id": thread_id}}).values
@@ -52,16 +54,21 @@ if "all_threads" not in st.session_state:
 
 if "current_thread_id" not in st.session_state:
     # thread_id = get_thread_id()
-    thread_id=list(st.session_state["all_threads"].keys())[-1]
+    thread_id = list(st.session_state["all_threads"].keys())[-1]
     st.session_state["current_thread_id"] = thread_id
     # st.session_state["all_threads"][thread_id] = "New Chat"
     load_message_history(thread_id)
-    
+
 # if "message_history" not in st.session_state:
 #     st.session_state["message_history"] = []
 
 
-CONFIG = {"configurable": {"thread_id": st.session_state["current_thread_id"]}}
+# CONFIG = {"configurable": {"thread_id": st.session_state["current_thread_id"]}}
+CONFIG = {
+    "configurable": {"thread_id": st.session_state["current_thread_id"]},
+    "metadata": {"thread_id": st.session_state["current_thread_id"]},
+    "run_name":"chatbot"
+}
 
 st.title(f"{st.session_state['all_threads'][st.session_state['current_thread_id']]}")
 st.caption(f"Thread ID: {st.session_state['current_thread_id']}")
@@ -130,7 +137,7 @@ if user_input:
             {
                 "prompt_with_chat_history": f"Here is the chat history: {st.session_state["message_history"]}"
             },
-            config=CONFIG,
+            config={**CONFIG,"run_name":"title generation"},
         )
         save_thread_title(title_response["title"])
         st.rerun()
