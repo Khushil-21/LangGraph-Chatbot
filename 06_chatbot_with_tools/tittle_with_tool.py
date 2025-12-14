@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from pydantic import Field, BaseModel
 
 load_dotenv()
-# model = ChatOllama(model="gemma3:1b")
-model = ChatOllama(model="qwen3-coder:480b-cloud")
+model = ChatOllama(model="gemma3:1b")
+# model = ChatOllama(model="gpt-oss:20b-cloud")
 
 
 
@@ -58,5 +58,8 @@ def get_all_threads():
     all_thread_ids_obj = {}
     for thread_id in all_thread_ids:
         state=title_generation_agent.get_state(config={"configurable": {"thread_id": f"{thread_id}"}}).values
-        all_thread_ids_obj[thread_id] = state["title"] if state["title"] else "New Chat"
+        if state.get("title"):
+            all_thread_ids_obj[thread_id] = state["title"]
+        else:
+            all_thread_ids_obj[thread_id] = "New Chat"
     return all_thread_ids_obj
