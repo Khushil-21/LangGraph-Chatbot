@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 from pydantic import Field, BaseModel
 
 load_dotenv()
-model = ChatOllama(model="gemma3:1b")
+# model = ChatOllama(model="gemma3:1b")
+model = ChatOllama(model="qwen3-coder:480b-cloud")
+
 
 
 class TitleGeneration(BaseModel):
